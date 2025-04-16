@@ -344,6 +344,25 @@
       background: #f6f2ff;
       transform: translateY(-1px);
     }
+    
+    /* Sound toggle button */
+    .sound-toggle {
+      position: absolute;
+      right: 60px;
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+      padding: 4px;
+      border-radius: 50%;
+    }
+    
+    .sound-toggle:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -358,6 +377,9 @@
         <i data-feather="message-circle"></i>
         <span class="logo-text">CHATBOT</span>
       </div>
+      <button class="sound-toggle" onclick="toggleSound()" title="Toggle sound">
+        <i data-feather="volume-2" id="sound-icon"></i>
+      </button>
       <button onclick="toggleChat()">
         <i data-feather="x"></i>
       </button>
@@ -366,7 +388,7 @@
     <div class="chat-body" id="message-container">
       <div class="welcome-message">
         <h3>Welcome to my Chat-bot</h3>
-        <p>I'm here to help with your questions or anything else you need.</p>
+        <p>I'm here to help with your questions, orders, or anything else you need.</p>
         <div class="quick-replies">
           <div class="quick-reply" onclick="sendQuickReply('Can you track my order?')">Order Tracking</div>
           <div class="quick-reply" onclick="sendQuickReply('I want cancel order')"> Cancel Order Request</div>
@@ -391,18 +413,36 @@
   <script>
     feather.replace();
     
+    // Sound configuration - using base64 encoded audio to ensure they load
+    let soundEnabled = true;
+    const messageSound = new Audio('data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
+    const receiveSound = new Audio('data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
+    
     // Sample bot responses
     const botResponses = {
-      "hi": "Hello! Welcome. What can I do for you today?",
-      "hello": "Hi there! ☕ How can I assist you with your anyelse?",
+      "hi": "Hello! Welcome to Aroma Beans Coffee. What can I do for you today?",
+      "hello": "Hi there! ☕ How can I assist you with your coffee needs?",
       "track": "Sure! Could you please provide your order number so I can check the tracking details for you?",
       "cancel": "Sure! Could you please provide your order number so I can check the your order for you?",
       "Refund": "📝 Refund Policy Thank you for your inquiry. Here is our refund policy:You may request a refund within 30 days of your purchase.The item must be unused and in its original condition.Refunds will be processed to your original payment method within 7–10 business days after approval.",
-      "menu": "no have bro",
-      "location": "80 หมู่ที่ 1 Vichitsongkram Rd, Tambon Kathu, Amphoe Kathu, Chang Wat Phuket 83120",
-      "default": "I don't understand you fuck you",
+      "menu": "You can view our full menu at www.aromabeans.com/menu. Would you like me to highlight some popular items?",
+      "location": "We have three locations: Downtown (123 Main St), Riverside (456 River Rd), and Uptown (789 Park Ave).",
+      "default": "ถามอะไรไร้สาระ",
       "update": "📝 Update Your Information Sure! What information would you like to update?👉 You can choose from: Phone Number, Email, or Mailing Address. Please type the field and your new value. (Example: Phone Number: 089-123-4567)",
       "abdul": "abdul is abdul 5555"
+    };
+    
+    // OpenAI API configuration
+    const OPENAI_API_KEY = 'sk-your-api-key-here'; // Replace with your actual API key
+    const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+    let useOpenAI = false; // Toggle between simple responses and OpenAI
+    
+    // Language detection
+    let currentLanguage = 'en';
+    const detectLanguage = (text) => {
+      // Simple language detection (you could use a more sophisticated library)
+      const thaiChars = /[\u0E00-\u0E7F]/;
+      return thaiChars.test(text) ? 'th' : 'en';
     };
 
     function toggleChat() {
@@ -419,13 +459,94 @@
         }, 10);
       }
     }
+    
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const soundIcon = document.getElementById('sound-icon');
+      soundIcon.setAttribute('data-feather', soundEnabled ? 'volume-2' : 'volume-x');
+      feather.replace();
+      
+      // Play a sound to indicate change
+      if (soundEnabled) {
+        messageSound.play().catch(e => console.log("Sound playback prevented:", e));
+      }
+    }
+    
+    function playMessageSound() {
+      if (soundEnabled) {
+        messageSound.currentTime = 0;
+        messageSound.play().catch(e => console.log("Sound playback prevented:", e));
+      }
+    }
+    
+    function playReceiveSound() {
+      if (soundEnabled) {
+        receiveSound.currentTime = 0;
+        receiveSound.play().catch(e => console.log("Sound playback prevented:", e));
+      }
+    }
 
     function sendQuickReply(text) {
       document.getElementById('input-message').value = text;
       sendMessage({preventDefault: () => {}});
     }
+    
+    // Math calculation function
+    function calculateMathExpression(expression) {
+      try {
+        // Remove all whitespace
+        expression = expression.replace(/\s+/g, '');
+        
+        // Simple validation - only allow numbers, basic operators, and parentheses
+        if (!/^[\d+\-*/().\s]+$/.test(expression)) {
+          return null;
+        }
+        
+        // Use Function constructor as a safer alternative to eval
+        return new Function('return ' + expression)();
+      } catch (e) {
+        return null;
+      }
+    }
+    
+    async function queryOpenAI(prompt, language = 'en') {
+      try {
+        const response = await fetch(OPENAI_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: `You are a helpful customer support chatbot for Aroma Beans Coffee. Respond in ${language === 'th' ? 'Thai' : 'English'}. Keep responses concise and friendly.`
+              },
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 150
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+      } catch (error) {
+        console.error('Error calling OpenAI API:', error);
+        return "I'm having trouble connecting to the AI service. Please try again later.";
+      }
+    }
 
-    function sendMessage(event) {
+    async function sendMessage(event) {
       event.preventDefault();
       const input = document.getElementById('input-message');
       const message = input.value.trim();
@@ -438,6 +559,7 @@
       userMessage.className = 'message user-message';
       userMessage.innerHTML = `<div class="message-text">${message}</div>`;
       messageContainer.appendChild(userMessage);
+      playMessageSound();
 
       // Clear input
       input.value = '';
@@ -460,8 +582,11 @@
       feather.replace();
       messageContainer.scrollTop = messageContainer.scrollHeight;
 
+      // Detect language from user message
+      currentLanguage = detectLanguage(message);
+      
       // Process message and create bot reply after delay
-      setTimeout(() => {
+      setTimeout(async () => {
         // Remove typing indicator
         messageContainer.removeChild(typingIndicator);
         
@@ -469,26 +594,39 @@
         const botMessage = document.createElement('div');
         botMessage.className = 'message bot-message';
         
-        // Simple response logic
-        const lowerMsg = message.toLowerCase();
-        let response = botResponses.default;
+        let response;
         
-        if (lowerMsg.includes('hi') || lowerMsg.includes('hello')) {
-          response = botResponses.hi;
-        } else if (lowerMsg.includes('track')) {
-          response = botResponses.track;
-        } else if (lowerMsg.includes('cancel')) {
-          response = botResponses.cancel;
-        } else if (lowerMsg.includes('Refund') || lowerMsg.includes('diet')) {
-          response = botResponses.Refund;
-        } else if (lowerMsg.includes('menu')) {
-          response = botResponses.menu;
-        } else if (lowerMsg.includes('location') || lowerMsg.includes('where')) {
-          response = botResponses.location;
-        } else if (lowerMsg.includes('update')) {
-          response = botResponses.update;
-        } else if (lowerMsg.includes('abdul')) {
-          response = botResponses.abdul;
+        // First check if this is a math question
+        const mathResult = calculateMathExpression(message);
+        if (mathResult !== null) {
+          response = `The answer is: ${mathResult}`;
+        } 
+        else if (useOpenAI) {
+          // Get response from OpenAI API
+          response = await queryOpenAI(message, currentLanguage);
+        } else {
+          // Simple response logic
+          const lowerMsg = message.toLowerCase();
+          
+          if (lowerMsg.includes('hi') || lowerMsg.includes('hello')) {
+            response = botResponses.hi;
+          } else if (lowerMsg.includes('track')) {
+            response = botResponses.track;
+          } else if (lowerMsg.includes('cancel')) {
+            response = botResponses.cancel;
+          } else if (lowerMsg.includes('Refund') || lowerMsg.includes('diet')) {
+            response = botResponses.Refund;
+          } else if (lowerMsg.includes('menu')) {
+            response = botResponses.menu;
+          } else if (lowerMsg.includes('location') || lowerMsg.includes('where')) {
+            response = botResponses.location;
+          } else if (lowerMsg.includes('update')) {
+            response = botResponses.update;
+          } else if (lowerMsg.includes('abdul')) {
+            response = botResponses.abdul;
+          } else {
+            response = botResponses.default;
+          }
         }
         
         botMessage.innerHTML = `
@@ -499,8 +637,27 @@
         messageContainer.appendChild(botMessage);
         feather.replace();
         messageContainer.scrollTop = messageContainer.scrollHeight;
+        playReceiveSound();
       }, 1500 + Math.random() * 1000); // Random delay for more natural feel
     }
+    
+    // Initialize with sound on
+    toggleSound();
+    toggleSound();
+    
+    // Preload sounds when user interacts with page
+    document.addEventListener('click', function() {
+      messageSound.volume = 0.5;
+      receiveSound.volume = 0.5;
+      messageSound.play().then(() => {
+        messageSound.pause();
+        messageSound.currentTime = 0;
+      }).catch(e => console.log("Sound preload prevented:", e));
+      receiveSound.play().then(() => {
+        receiveSound.pause();
+        receiveSound.currentTime = 0;
+      }).catch(e => console.log("Sound preload prevented:", e));
+    }, { once: true });
   </script>
 </body>
 </html>
